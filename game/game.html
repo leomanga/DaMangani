@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="shortcut icon" href="./images/logo.ico">
+    <title>Game</title>
+    <link href="./css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="./css/style.css">
+    <script src="./js/bootstrap.js"></script>
+    <script src="/js/jquery.min.js"></script>
+    <script src="./js/jquery-ui.js"></script> 
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.3.14/angular.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="./js/popper.min.js"></script>
+    <script src="./js/bootstrap.min.js"></script>
+    <script src="./js/jquery.sticky.js"></script>
+    <script src="./js/main-lobby.js"></script>
+    <script src="./js/main-lobby.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,700" rel="stylesheet">
+    <style>
+        div{
+            border: 1px;
+            border-color: "black";
+        }
+        .bianca{
+            background-color: bisque;
+            width: 70px;
+            height: 70px
+        } 
+        .nera{
+            background-color: saddlebrown;
+            width: 70px;
+            height: 70px;
+        }
+        .p-bianca {
+            background: lightblue;
+            border-radius: 50%;
+            position:relative;
+            width: 100%;
+            height: 100%
+        }
+        .p-nera {
+            background: black;
+            border-radius: 50%;
+            
+            width: 100%;
+            height: 100%
+        }
+        .regina{
+            border-radius:50%;
+            border:3px dotted darkgoldenrod;
+            width:100%;
+            height: 100%;
+
+        }
+        .selected{
+            background-color: aqua;
+        }
+        .vincitore-class{
+            background-color: cornflowerblue;
+            position:absolute;
+            top:40px;
+            margin:auto;
+        }
+        
+    </style>
+    
+    <link rel="stylesheet" href="./fonts/icomoon/style.css">
+
+    <link rel="stylesheet" href="./css/owl.carousel.min.css">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="./css/bootstrap.min.css">
+    
+    <!-- Style -->
+    <link rel="stylesheet" href="./css/style-lobby.css">
+
+
+</head>
+<body style="background-color: #f6f7fc;">
+    <header class="site-navbar js-sticky-header site-navbar-target" role="banner">
+
+        <div class="container">
+          <div class="row align-items-center position-relative">
+
+
+            <div class="site-logo">
+              <a href="/" class="text-black"><span class="text-primary">DaMa-ngani</a>
+            </div>
+
+            <div class="col-12">
+                <nav class="site-navigation text-right ml-auto " role="navigation">
+
+                    <ul class="site-menu main-menu  d-lg-block">
+                        <li><a href="/" class="nav-link">Log Out</a></li>
+                    </ul>
+                </nav>
+
+            </div>
+          </div>
+        </div>
+
+      </header>
+    <div class="container-fluid centra" ng-app="myApp" ng-controller="giocatori">
+        
+        <!--        <div class= "vincitore-class" ng-if="vincitore != null" style="position:absolute; margin-top: 70px; margin-left: auto; margin-right: auto;">
+            <div class="card text-left bg-info" >
+                <div class="card-body">
+                    <h4 class="card-title">IL VINCITORE É IL <b>{{vincitore}}</b></h4>
+                    <button ng-click="backLobby()">Torna alla lobby</button>
+                </div>
+            </div>
+    
+        </div>-->
+
+        <div class="row" style="margin-top:30px;">
+            <div class="col" style="text-align: center;" >
+                <table style="border: 2px ridge; margin-left: auto; margin-right: auto;">
+                    <tr ng-repeat ="riga in map">
+                        <td ng-repeat="casella in riga">
+                            <div class="{{casella.casella}} {{casella.selected}}" ng-click = "tocco(this)">
+                                
+                                <div ng-if="casella.isRegina == true" class="{{casella.pedina}} regina"></div>
+                                <div ng-if="casella.isRegina == false" class="{{casella.pedina}}"></div>
+                            </div>
+                        </td>
+        
+                    </tr>
+                </table>
+            </div>
+            <div class="col">
+                <div class="card text-left" style="width:300px; margin-top: 40px;   margin-left: auto; margin-right: auto;">
+                    <div class="card-body">
+                        <h4 class="card-title">Benvenuto: <b>{{utente.username}}</b></h4>
+                        <p class="card-text">Sei il : <b>{{utente.colore}}</b></p>
+                        <p class="card-text">Turno: <b>{{turno}}</b></p>
+                        <h4 style="color:red" ng-if="vincitore != null" class="card-text">Vince il <b>{{vincitore}}</b></h4>
+                        <button  ng-click="backLobby()" type="button" class="btn btn-info" ng-if="vincitore != null">Torna alla lobby</button>
+                        <button  ng-click="resa()" type="button" class="btn btn-danger" ng-if="vincitore == null">Resa</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script>
+
+        var app = angular.module('myApp', []);
+        let scope = "";
+        app.controller('giocatori', function($scope, $http)
+                                    {
+                                        scope = $scope;
+                                        $scope.giocatori = {};
+                                        $scope.bottoni = [];
+                                        $scope.socket = io();
+                                        $scope.lista = [];
+                                        $scope.id = getCookie("id");
+                                        $scope.idGioco = getCookie("idGioco");
+                                        $scope.utente = "VOID";
+                                        $scope.map = [];
+                                        $scope.turno = "VOID";
+                                        $scope.colore = "VOID";
+                                        $scope.casellaSelezionata = null;
+                                        $scope.vincitore;
+                                    
+                                        sendReady($scope.socket, $scope.id, $scope.idGioco);
+                                        
+                                        $scope.socket.on("mainUser", (utente) => {
+                                                $scope.utente = utente;
+                                                $scope.$apply();
+                                        });
+
+                                        $scope.socket.on("gameStatus", (info) => {                                        
+                                            $scope.map = info.map;
+                                            $scope.turno = info.turno;
+                                            $scope.$apply();
+                                        });
+
+                                        $scope.socket.on("endGame", (vincitore) => {
+                                            $scope.vincitore = vincitore;
+                                            $scope.$apply();
+                                        });
+
+                                        $scope.tocco= function(element){
+                                            if($scope.casellaSelezionata == null){
+                                                element.casella.selected = "selected";
+                                                $scope.casellaSelezionata = element.casella;
+                                                return;
+                                            }
+                                            $scope.casellaSelezionata.selected = "null";
+                                            move($scope.casellaSelezionata.x, $scope.casellaSelezionata.y, 
+                                                 element.casella.x, element.casella.y);
+                                            $scope.casellaSelezionata = null;   
+                                        }
+                                        $scope.resa = function(){
+                                            $scope.socket.emit("resa", $scope.id);
+                                        }
+                                        $scope.backLobby = function(){
+                                            setCookie("id", $scope.id);
+                                            window.location = "lobby.html";
+                                        }
+
+                                    });
+
+
+
+    function move(p1X, p1Y, p2X, p2Y){
+        let info = {
+            id: scope.id,
+            idGioco: scope.idGioco,
+            startX:p1X,
+            startY:p1Y,
+            endX:p2X,
+            endY:p2Y
+        };
+        scope.socket.emit("move", info);
+    }
+
+    function creaListaBottoni(giocatori){
+        let lista = [];
+        for(id in giocatori){
+            lista.push(giocatori)
+
+        }
+    }                            
+    function sendReady(socket, id, idGioco){
+        let informazioni = {
+                id:id,
+                idGioco:idGioco
+        }
+        socket.emit("gameReady", informazioni);
+    }   
+
+    function setCookie(cname, cvalue) {
+        document.cookie = cname + "=" + cvalue + ";path=/";
+    }
+
+    function getCookie(cname) {
+        let name = cname + "=";
+        let decodedCookie = decodeURIComponent(document.cookie);
+        let ca = decodedCookie.split(';');
+        for(let i = 0; i <ca.length; i++) {
+            let c = ca[i];
+            while (c.charAt(0) == ' ') {
+            c = c.substring(1);
+            }
+            if (c.indexOf(name) == 0) {
+            return c.substring(name.length, c.length);
+            }
+        }
+        return "";
+    }
+
+
+
+</script>
+
+</body>
+</html>

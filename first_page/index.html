@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Pagina iniziale</title>
+    <link href="./css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href=".css/style.css">
+    <script src="./js/bootstrap.js"></script>
+    <script src="./js/jquery.min.js"></script>
+    <script src="./js/jquery-ui.js"></script>  
+    <script src="/socket.io/socket.io.js"></script>
+</head>
+
+<body>
+    <div class="container-fluid p-5 bg-primary text-white text-center">
+        <h1>THE BEST DAMA ONLINE</h1> 
+    </div>
+
+    <div class="row">
+        <div class="container mt-5">
+            <div class="row">
+                <div class="col text-center pagination justify-content-center avvicina-a-destra">
+                    <div class="card" style="width:400px">
+                        <!--<img class="card-img-top" src="img_avatar1.png" alt="Card image">-->
+                        <div class="card-body">
+                          <h4 class="card-title">LOGIN</h4>
+                          <p class="card-text">Se hai già un account, accedi</p>
+                          <a href="/login.html" class="btn btn-primary">Login</a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col text-center pagination justify-content-center">
+                    <div class="card" style="width:400px">
+                        <!--<img class="card-img-top" src="img_avatar1.png" alt="Card image">-->
+                        <div class="card-body">
+                          <h4 class="card-title">REGISTRAZIONE</h4>
+                          <p class="card-text">Se non hai ancora creato un account, registrati!</p>
+                          <a href="/registrazione.html" class="btn btn-primary">Registrati</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        let socket = io();
+        socket.on('registrazione', function(dati) {
+
+                console.log("CLIENT " + JSON.parse(dati));
+        });
+    </script>
+</body>
+</html>

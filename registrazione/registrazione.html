@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <link rel="shortcut icon" href="./images/logo.ico">
+    <title>Registrazione</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="./fonts/icomoon/style.css">
+
+    <link rel="stylesheet" href="./css/owl.carousel.min.css">
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="./css/bootstrap.min.css">
+    
+    <!-- Style -->
+    <link rel="stylesheet" href= "./css/style.css">
+
+    <script src="./js/bootstrap.js"></script>
+    <script src="./js/jquery.min.js"></script>
+    <script src="./js/jquery-ui.js"></script> 
+
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+      .error{
+        color:red
+      }
+    </style>
+  </head>
+  <body>
+  
+
+  <div class="half">
+    <div class="bg order-1 order-md-2" style="background-image: url('images/img-login.jpg');">
+    </div>
+    <div class="contents order-2 order-md-1">
+
+      <div class="container">
+        <div class="row align-items-center justify-content-center">
+          <div class="col-md-6">
+            <div class="form-block">
+              <div class="text-center mb-5">
+              <h3>Register to <strong>DaMa-ngani</strong></h3>
+              <!-- <p class="mb-4">Lorem ipsum dolor sit amet elit. Sapiente sit aut eos consectetur adipisicing.</p> -->
+              </div>
+              <form>
+                <div class="form-group first">
+                  <label for="username">New username</label>
+                  <input type="text" class="form-control" placeholder="new-username" id="username">
+                  <p id="log-err" class="error"></p>
+                </div>
+                <div class="form-group last mb-3">
+                  <label for="password">New password</label>
+                  <input type="password" class="form-control" placeholder="New_Password! #" id="password">
+                  <p id="pass-err" class="error"></p>
+                </div>
+
+                <div class="d-sm-flex mb-5 align-items-center">
+                  <span class="ml-auto"><a href="/login.html" class="forgot-pass">Login</a></span> 
+                </div>
+
+                <input type="submit" value="Log In" class="btn btn-block btn-primary">
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    
+  </div>
+    
+    
+
+    <script src="js/jquery-3.3.1.min.js"></script>
+    <script src="js/popper.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        let socket = io();
+        $("form").submit(function(e) {
+            e.preventDefault(e);
+            let dati = {
+                username : $("#username").val(),
+                password : $("#password").val()
+            }
+            socket.emit("testRegistrazione", dati);
+        });
+        
+            
+
+        socket.on("regResult", function(result) {
+            
+            if(result.isValid){
+                $("#log-err").hide;
+                $("#pass-err").hide;
+                salvaId(result.id);
+                window.location = "lobby.html";
+                return;
+            }
+            visualizzaErrori(result);
+        });
+
+        function visualizzaErrori(info){
+            $("#log-err").text(info.user_problems);
+            $("#pass-err").text(info.pass_problems);
+
+            $("#log-err").show;
+            $("#pass-err").show;
+        }
+
+        function salvaId(id){
+            document.cookie = "id="+id;
+        }
+    </script>
+  </body>
+</html>
